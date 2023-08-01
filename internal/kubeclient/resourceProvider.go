@@ -110,7 +110,7 @@ func (c *KubeClient) GetAPIEndpoints(namespace string) ([]string, error) {
 		namespace = metav1.NamespaceDefault
 	}
 
-	apiServerEndpoints, err := c.getAPIServerEndpoints()
+	apiServerEndpoints, err := c.getEndpointsList(namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -118,20 +118,26 @@ func (c *KubeClient) GetAPIEndpoints(namespace string) ([]string, error) {
 	return apiServerEndpoints, nil
 }
 
-func (c *KubeClient) getAPIServerEndpoints() ([]string, error) {
-	endpoints, err := c.clientset.CoreV1().Endpoints("kube-system").Get(context.TODO(), "kubernetes", metav1.GetOptions{})
+func (c *KubeClient) getEndpointsList(namespace string) ([]string, error) {
+	// Get the list of all endpoints in the specified namespace.
+	endpointsList, err := c.clientset.CoreV1().Endpoints(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to get API server endpoints: %w", err)
+		return nil, fmt.Errorf("failed to get endpoints list in namespace '%s': %w", namespace, err)
 	}
 
-	var apiServerEndpoints []string
-	for _, subset := range endpoints.Subsets {
-		for _, address := range subset.Addresses {
-			apiServerEndpoints = append(apiServerEndpoints, fmt.Sprintf("%s:%d", address.IP, subset.Ports[0].Port))
+	// Extract the IP:Port pairs for all endpoints.
+	var endpointList []string
+	for _, endpoints := range endpointsList.Items {
+		for _, subset := range endpoints.Subsets {
+			for _, address := range subset.Addresses {
+				for _, port := range subset.Ports {
+					endpointList = append(endpointList, fmt.Sprintf("%s:%d", address.IP, port.Port))
+				}
+			}
 		}
 	}
 
-	return apiServerEndpoints, nil
+	return endpointList, nil
 }
 
 func (c *KubeClient) GetClusterConditions() ([]shared.ClusterConditionStatus, error) {

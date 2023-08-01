@@ -4,6 +4,8 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"log"
+
 	"github.com/Parthiba-Hazra/kubervigil/cmd/kuberVigil/kubercmd"
 	"github.com/Parthiba-Hazra/kubervigil/internal/analyzer"
 	"github.com/spf13/cobra"
@@ -21,7 +23,10 @@ current API version of each Pod in the specified namespace. The result of the an
 		configPath, _ := cmd.Flags().GetString("config")
 		namespacce, _ := cmd.Flags().GetString("ns")
 
-		analyzer.AnalyzeResourceHealth(configPath, namespacce, "PODS")
+		err := analyzer.AnalyzeResourceHealth(configPath, namespacce, "PODS")
+		if err != nil {
+			log.Print(err)
+		}
 	},
 }
 

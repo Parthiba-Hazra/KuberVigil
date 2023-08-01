@@ -4,6 +4,8 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package apiversion
 
 import (
+	"log"
+
 	"github.com/Parthiba-Hazra/kubervigil/cmd/kuberVigil/kubercmd"
 	"github.com/Parthiba-Hazra/kubervigil/internal/analyzer"
 	"github.com/spf13/cobra"
@@ -18,7 +20,10 @@ It checks the preferred API version of resources and prints the result.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		configPath, _ := cmd.Flags().GetString("config")
 
-		analyzer.GetPreferedAPIversion(configPath)
+		err := analyzer.GetPreferedAPIversion(configPath)
+		if err != nil {
+			log.Print(err)
+		}
 	},
 }
 

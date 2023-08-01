@@ -4,6 +4,8 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"log"
+
 	"github.com/Parthiba-Hazra/kubervigil/cmd/kuberVigil/kubercmd"
 	"github.com/Parthiba-Hazra/kubervigil/internal/analyzer"
 	"github.com/spf13/cobra"
@@ -21,7 +23,10 @@ The result of the analysis is printed to the console, indicating the health stat
 		configPath, _ := cmd.Flags().GetString("config")
 		namespacce, _ := cmd.Flags().GetString("ns")
 
-		analyzer.AnalyzeResourceHealth(configPath, namespacce, "INGRESS")
+		err := analyzer.AnalyzeResourceHealth(configPath, namespacce, "INGRESS")
+		if err != nil {
+			log.Print(err)
+		}
 	},
 }
 
