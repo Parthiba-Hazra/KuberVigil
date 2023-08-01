@@ -11,7 +11,7 @@ import (
 )
 
 // checkCmd represents the check command
-var checkCmd = &cobra.Command{
+var CheckCmd = &cobra.Command{
 	Use:   "check",
 	Short: "Perform Kubernetes Resource Health Checks",
 	Long: `The "check" command allows you to perform comprehensive health checks on your Kubernetes resources. It analyzes Kubernetes Deployments, StatefulSets, ConfigMaps, Pods, and Services to ensure they comply with the latest API versions, assess the health status of Pods, and verify the connectivity and configurations of Services.
@@ -31,7 +31,7 @@ var checkCmd = &cobra.Command{
 }
 
 func init() {
-	cmd.RootCmd.AddCommand(checkCmd)
+	cmd.RootCmd.AddCommand(CheckCmd)
 
 	// Here you will define your flags and configuration settings.
 

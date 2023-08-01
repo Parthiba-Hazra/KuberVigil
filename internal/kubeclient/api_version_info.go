@@ -11,41 +11,27 @@ type Client interface {
 
 	// GetAPIVersionInfo retrieves information about the deprecation and removal status
 	// of Kubernetes APIs for different versions.
-	GetAPIVersionInfo() (APIVersionInfo, error)
+	GetAPIVersionInfo() (shared.Resource, error)
 }
 
-// APIVersionInfo provides information about the deprecation and removal status of Kubernetes APIs.
-type APIVersionInfo struct {
-	// Map from API version to deprecation status (e.g., "v1": "deprecated", "apps/v1": "removed").
-	DeprecationStatus map[string]string
-
-	// Map from API version to removal status (e.g., "v1": "removed", "apps/v1": "not-removed").
-	RemovalStatus map[string]string
-}
-
-// GetAPIVersionInfo implements Client.
-func (c *kubeClient) GetAPIVersionInfo() ([]shared.Resource, error) {
+func (c *KubeClient) GetAPIVersionInfo() (map[string]string, error) {
 	// Fetch the preferred API resources from the Kubernetes cluster.
 	groupVersions, err := c.clientset.Discovery().ServerPreferredResources()
 	if err != nil {
 		return nil, err
 	}
 
-	var resources []shared.Resource
+	// Create a map to store resource kinds and their preferred API versions.
+	versionInfo := make(map[string]string)
 
-	// Iterate through the API group versions and extract the resources.
+	// Iterate through the API group versions and extract the preferred API versions for each resource kind.
 	for _, groupVersion := range groupVersions {
 		for _, resourceList := range groupVersion.APIResources {
 			apiVersion := groupVersion.GroupVersion
-			resources = append(resources, shared.Resource{
-				Kind:       resourceList.Kind,
-				Name:       resourceList.Name,
-				Namespace:  "", // No namespace for API group versions
-				APIVersion: apiVersion,
-			})
+			versionInfo[resourceList.Kind] = apiVersion
 		}
 	}
 
 	// Return the extracted version info.
-	return resources, nil
+	return versionInfo, nil
 }

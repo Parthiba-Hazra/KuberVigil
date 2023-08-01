@@ -4,125 +4,201 @@ package kubeclient
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Parthiba-Hazra/kubervigil/internal/shared"
+	v1 "k8s.io/api/apps/v1"
+	v2 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // GetResources implements Client.
-func (c *kubeClient) GetResources(namespace string) ([]shared.Resource, error) {
+func (c *KubeClient) GetDeployments(namespace string) (*v1.DeploymentList, error) {
 	if namespace == "" {
 		namespace = metav1.NamespaceDefault
 	}
-
-	var resources []shared.Resource
 
 	// Fetch Deployments
 	deployments, err := c.clientset.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
-	for _, deployment := range deployments.Items {
-		resources = append(resources, shared.Resource{
-			Kind:       "Deployment",
-			Name:       deployment.Name,
-			Namespace:  deployment.Namespace,
-			APIVersion: deployment.APIVersion,
-			CreatedAt:  deployment.CreationTimestamp.Time,
-		})
+
+	return deployments, nil
+}
+
+func (c *KubeClient) GetPods(namespace string) (*v2.PodList, error) {
+	if namespace == "" {
+		namespace = metav1.NamespaceDefault
 	}
 
-	// Fetch Pods
 	pods, err := c.clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
-	for _, pod := range pods.Items {
-		resources = append(resources, shared.Resource{
-			Kind:       "Pod",
-			Name:       pod.Name,
-			Namespace:  pod.Namespace,
-			APIVersion: pod.APIVersion,
-			CreatedAt:  pod.CreationTimestamp.Time,
-		})
+
+	return pods, nil
+}
+
+func (c *KubeClient) GetServices(namespace string) (*v2.ServiceList, error) {
+	if namespace == "" {
+		namespace = metav1.NamespaceDefault
 	}
 
-	// Fetch Services
 	services, err := c.clientset.CoreV1().Services(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
-	for _, service := range services.Items {
-		resources = append(resources, shared.Resource{
-			Kind:       "Service",
-			Name:       service.Name,
-			Namespace:  service.Namespace,
-			APIVersion: service.APIVersion,
-			CreatedAt:  service.CreationTimestamp.Time,
-		})
+
+	return services, nil
+}
+
+func (c *KubeClient) GetStatefulsets(namespace string) (*v1.StatefulSetList, error) {
+	if namespace == "" {
+		namespace = metav1.NamespaceDefault
 	}
 
-	// Fetch StatefulSets
 	statefulSets, err := c.clientset.AppsV1().StatefulSets(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
-	for _, statefulSet := range statefulSets.Items {
-		resources = append(resources, shared.Resource{
-			Kind:       "StatefulSet",
-			Name:       statefulSet.Name,
-			Namespace:  statefulSet.Namespace,
-			APIVersion: statefulSet.APIVersion,
-			CreatedAt:  statefulSet.CreationTimestamp.Time,
-		})
+
+	return statefulSets, nil
+}
+
+func (c *KubeClient) GetDeamonsets(namespace string) (*v1.DaemonSetList, error) {
+	if namespace == "" {
+		namespace = metav1.NamespaceDefault
 	}
 
-	// Fetch DaemonSets
 	daemonSets, err := c.clientset.AppsV1().DaemonSets(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
-	for _, daemonSet := range daemonSets.Items {
-		resources = append(resources, shared.Resource{
-			Kind:       "DaemonSet",
-			Name:       daemonSet.Name,
-			Namespace:  daemonSet.Namespace,
-			APIVersion: daemonSet.APIVersion,
-			CreatedAt:  daemonSet.CreationTimestamp.Time,
-		})
+
+	return daemonSets, nil
+}
+
+func (c *KubeClient) GetConfigmaps(namespace string) (*v2.ConfigMapList, error) {
+	if namespace == "" {
+		namespace = metav1.NamespaceDefault
 	}
 
-	// Fetch Jobs
-	jobs, err := c.clientset.BatchV1().Jobs(namespace).List(context.TODO(), metav1.ListOptions{})
+	configMaps, err := c.clientset.CoreV1().ConfigMaps(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
-	for _, job := range jobs.Items {
-		resources = append(resources, shared.Resource{
-			Kind:       "Job",
-			Name:       job.Name,
-			Namespace:  job.Namespace,
-			APIVersion: job.APIVersion,
-			CreatedAt:  job.CreationTimestamp.Time,
-		})
+
+	return configMaps, nil
+}
+
+func (c *KubeClient) GetSecrets(namespace string) (*v2.SecretList, error) {
+	if namespace == "" {
+		namespace = metav1.NamespaceDefault
 	}
 
-	// Fetch CronJobs
-	cronJobs, err := c.clientset.BatchV1().CronJobs(namespace).List(context.TODO(), metav1.ListOptions{})
+	secrets, err := c.clientset.CoreV1().Secrets(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
-	for _, cronJob := range cronJobs.Items {
-		resources = append(resources, shared.Resource{
-			Kind:       "CronJob",
-			Name:       cronJob.Name,
-			Namespace:  cronJob.Namespace,
-			APIVersion: cronJob.APIVersion,
-			CreatedAt:  cronJob.CreationTimestamp.Time,
+
+	return secrets, nil
+}
+
+func (c *KubeClient) GetAPIEndpoints(namespace string) ([]string, error) {
+	if namespace == "" {
+		namespace = metav1.NamespaceDefault
+	}
+
+	apiServerEndpoints, err := c.getAPIServerEndpoints()
+	if err != nil {
+		return nil, err
+	}
+
+	return apiServerEndpoints, nil
+}
+
+func (c *KubeClient) getAPIServerEndpoints() ([]string, error) {
+	endpoints, err := c.clientset.CoreV1().Endpoints("kube-system").Get(context.TODO(), "kubernetes", metav1.GetOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get API server endpoints: %w", err)
+	}
+
+	var apiServerEndpoints []string
+	for _, subset := range endpoints.Subsets {
+		for _, address := range subset.Addresses {
+			apiServerEndpoints = append(apiServerEndpoints, fmt.Sprintf("%s:%d", address.IP, subset.Ports[0].Port))
+		}
+	}
+
+	return apiServerEndpoints, nil
+}
+
+func (c *KubeClient) GetClusterConditions() ([]shared.ClusterConditionStatus, error) {
+	// Get the list of nodes in the cluster
+	nodes, err := c.clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get nodes: %s", err)
+	}
+
+	// Check node availability
+	allNodesAvailable := true
+	for _, node := range nodes.Items {
+		for _, condition := range node.Status.Conditions {
+			if condition.Type == "Ready" && condition.Status != "True" {
+				allNodesAvailable = false
+				break
+			}
+		}
+	}
+
+	// Get the list of pods in the cluster
+	pods, err := c.clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to get pods: %s", err)
+	}
+
+	// Check pod status
+	allPodsRunning := true
+	for _, pod := range pods.Items {
+		if pod.Status.Phase != "Running" {
+			allPodsRunning = false
+			break
+		}
+	}
+
+	// Create a slice to hold the cluster conditions
+	conditions := []shared.ClusterConditionStatus{}
+
+	// Add NodeAvailability condition
+	if allNodesAvailable {
+		conditions = append(conditions, shared.ClusterConditionStatus{
+			Type:    "NodeAvailability",
+			Status:  "Healthy",
+			Message: "All nodes are available",
+		})
+	} else {
+		conditions = append(conditions, shared.ClusterConditionStatus{
+			Type:    "NodeAvailability",
+			Status:  "Error",
+			Message: "Some nodes are not available",
 		})
 	}
 
-	// Add other resource types similarly.
+	// Add PodStatus condition
+	if allPodsRunning {
+		conditions = append(conditions, shared.ClusterConditionStatus{
+			Type:    "PodStatus",
+			Status:  "Healthy",
+			Message: "All pods are running",
+		})
+	} else {
+		conditions = append(conditions, shared.ClusterConditionStatus{
+			Type:    "PodStatus",
+			Status:  "Error",
+			Message: "Some pods are not running",
+		})
+	}
 
-	return resources, nil
+	return conditions, nil
 }
