@@ -39,24 +39,38 @@ func CreateAPIServerHealthReport(apiServerEndpoints []string, clusterConditions 
 }
 
 func checkEndpointHealth(endpoint string) (string, string) {
+	// Create a channel to communicate the result and log messages
+	resultCh := make(chan string)
+	logCh := make(chan string)
+
 	// Create a HTTP client with a timeout
 	client := http.Client{
-		Timeout: 5 * time.Second,
+		Timeout: 10 * time.Second,
 	}
 
-	// Perform an HTTP GET request to the API server endpoint
-	resp, err := client.Get(fmt.Sprintf("http://%s/healthz", endpoint))
-	if err != nil {
-		return "Error", fmt.Sprintf("Failed to reach API Server endpoint: %s", err)
-	}
-	defer resp.Body.Close()
+	// Start a goroutine to perform the HTTP GET request
+	go func() {
+		logCh <- fmt.Sprintf("Checking API Server endpoint: %s...\n", endpoint)
+		resp, err := client.Get(fmt.Sprintf("http://%s/healthz", endpoint))
+		if err != nil {
+			resultCh <- fmt.Sprintf("Error: Failed to reach API Server endpoint: %s", err)
+		} else {
+			defer resp.Body.Close()
+			if resp.StatusCode == http.StatusOK {
+				resultCh <- "Healthy"
+			} else {
+				resultCh <- fmt.Sprintf("Error: API Server endpoint returned status code: %d", resp.StatusCode)
+			}
+		}
+	}()
 
-	// Check the response status code
-	if resp.StatusCode == http.StatusOK {
-		return "Healthy", "API Server endpoint is reachable"
+	// Wait for the result from the goroutine or a 10-second timeout
+	select {
+	case result := <-resultCh:
+		return result, <-logCh
+	case <-time.After(10 * time.Second):
+		return "Error", "Timeout: API Server endpoint check took too long"
 	}
-
-	return "Error", fmt.Sprintf("API Server endpoint returned status code: %d", resp.StatusCode)
 }
 
 func getOverallAPIServerHealth(endpoints []shared.EndpointHealthStatus, conditions []shared.ClusterConditionStatus) (string, string) {

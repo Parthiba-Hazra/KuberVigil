@@ -27,50 +27,66 @@ go install
 To use Kubervigil, you need to have a valid kubeconfig file with access to your Kubernetes cluster.
 
 ```bash
-kubervigil [command]
+kubervigil check [command]
 ```
 ### Commands
+
+#### APIversion command
+Check preferred api-versions for all resources.
+
+```bash
+kubervigil check apiversion
+```
+NOTE: Providing kubeconfig path or namespace is optional if you dont provide config path it will try to get path from ~/.kube/config, and if you dont provide any namespace it will autometically serlect the default namespace.
+
 #### API Command
 Check the preferred Kubernetes API versions for resources in a given namespace.
 
 ```bash
-kubervigil api --config <path/to/kubeconfig> --ns=<namespace>
+kubervigil check api --config=<path/to/kubeconfig> --ns=<namespace>
 ```
 ### Pods Command
 Analyze the health of Pods in a given namespace.
 
 ```bash
-kubervigil pods --config <path/to/kubeconfig> --ns=<namespace>
+kubervigil check pods --config=<path/to/kubeconfig> --ns=<namespace>
 ```
 #### Services Command
 Analyze the health of Services in a given namespace.
 
 ```bash
-kubervigil services --config <path/to/kubeconfig> --ns=<namespace>
+kubervigil check services --config=<path/to/kubeconfig> --ns=<namespace>
 ````
 #### Deployments Command
 Analyze the health of Deployments in a given namespace.
 
 ```bash
-kubervigil deployments --config <path/to/kubeconfig> --ns=<namespace>
+kubervigil check deployments --config=<path/to/kubeconfig> --ns=<namespace>
 ```
 #### Daemonsets Command
 Analyze the health of DaemonSets in a given namespace.
 
 ```bash
-kubervigil daemonsets --config <path/to/kubeconfig> --ns=<namespace>
+kubervigil check daemonsets --config=<path/to/kubeconfig> --ns=<namespace>
 ```
+#### Statefulsets command
+Analyze the health of Statefulsets in a given namespace.
+
+```bash
+kubervigil check statefulsets --config=<path/to/kubeconfig> --ns=<namespace>
+```
+
 #### Configmaps Command
 Analyze the health of ConfigMaps in a given namespace.
 
 ```bash
-kubervigil configmaps --config <path/to/kubeconfig> --ns=<namespace>
+kubervigil check configmaps --config=<path/to/kubeconfig> --ns=<namespace>
 ```
 #### Ingress Command
 Analyze the health of Ingress resources in a given namespace.
 
 ```bash
-kubervigil ingress --config <path/to/kubeconfig> --ns=<namespace>
+kubervigil check ingress --config=<path/to/kubeconfig> --ns=<namespace>
 ```
 
 We will be add more helath analysis features.
