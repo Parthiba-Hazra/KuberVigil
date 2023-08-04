@@ -193,3 +193,13 @@ type ClusterCondition struct {
 	Status  string
 	Message string
 }
+
+// ResourceInfo represents the information of a Kubernetes API resource.
+type ResourceInfo struct {
+	Name       string
+	Group      string
+	Version    string
+	APIPath    string
+	Kind       string
+	Namespaced bool
+}

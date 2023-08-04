@@ -9,8 +9,6 @@ type Client interface {
 	// GetResources fetches a list of Kubernetes resources from the cluster.
 	GetResources() ([]shared.Resource, error)
 
-	// GetAPIVersionInfo retrieves information about the deprecation and removal status
-	// of Kubernetes APIs for different versions.
 	GetAPIVersionInfo() (shared.Resource, error)
 }
 

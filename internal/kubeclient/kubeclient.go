@@ -4,6 +4,7 @@ import (
 	"flag"
 	"path/filepath"
 
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
@@ -11,7 +12,9 @@ import (
 
 // kubeClient is a concrete implementation of the Client interface.
 type KubeClient struct {
-	clientset *kubernetes.Clientset
+	clientset     *kubernetes.Clientset
+	dynamicClient dynamic.Interface
+	namespace     string
 }
 
 // NewClient creates a new Kubernetes API client and returns it as the Client interface.
