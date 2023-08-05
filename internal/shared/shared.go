@@ -203,3 +203,10 @@ type ResourceInfo struct {
 	Kind       string
 	Namespaced bool
 }
+
+type Package struct {
+	Kind       string `json:"kind" yaml:"kind"`
+	APIVersion string `json:"apiVersion" yaml:"apiVersion"`
+	Name       string `json:"name" yaml:"name"`
+	Namespace  string `json:"namespace" yaml:"namespace"`
+}
