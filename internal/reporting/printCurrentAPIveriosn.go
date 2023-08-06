@@ -11,8 +11,8 @@ func PrintPackages(packages []*shared.Package) {
 	for _, pkg := range packages {
 		fmt.Printf("  Kind: %s\n", pkg.Kind)
 		fmt.Printf("  APIVersion: %s\n", pkg.APIVersion)
-		fmt.Printf("  Name: %s\n", pkg.Name)
-		fmt.Printf("  Namespace: %s\n", pkg.Namespace)
+		fmt.Printf("  Name: %s\n", pkg.Metadata.Name)
+		fmt.Printf("  Namespace: %s\n", pkg.Metadata.Namespace)
 		fmt.Println()
 	}
 }

@@ -205,8 +205,13 @@ type ResourceInfo struct {
 }
 
 type Package struct {
-	Kind       string `json:"kind" yaml:"kind"`
-	APIVersion string `json:"apiVersion" yaml:"apiVersion"`
-	Name       string `json:"name" yaml:"name"`
-	Namespace  string `json:"namespace" yaml:"namespace"`
+	Kind       string    `json:"kind" yaml:"kind"`
+	APIVersion string    `json:"apiVersion" yaml:"apiVersion"`
+	Metadata   Meta      `json:"metadata" yaml:"metadata"`
+	Items      []Package `json:"items" yaml:"items"`
+}
+
+type Meta struct {
+	Name      string `json:"name" yaml:"name"`
+	Namespace string `json:"namespace" yaml:"namespace"`
 }

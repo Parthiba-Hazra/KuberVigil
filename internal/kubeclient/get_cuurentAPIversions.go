@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 
 	"github.com/Parthiba-Hazra/kubervigil/internal/reporting"
 	"github.com/Parthiba-Hazra/kubervigil/internal/shared"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/discovery"
@@ -73,19 +74,19 @@ func (dc *DiscoveryClient) GetResourceInfo() ([]*shared.Package, error) {
 		if dc.namespace != "" {
 			ri = nri.Namespace(dc.namespace)
 		}
-		log.Printf("retrieving : %s.%s.%s", g.Resource, g.Version, g.Group)
+		log.Printf("fetcing data: %s.%s.%s", g.Resource, g.Version, g.Group)
 		rs, err := ri.List(context.TODO(), metav1.ListOptions{})
 		if err != nil {
-			log.Printf("failed to retrieve: %v %v", g, err)
+			log.Printf("failed to fetch: %v %v", g, err)
 			continue
 		}
 
 		if len(rs.Items) == 0 {
-			log.Printf("No annotations for Resource-version %s", rs.GetAPIVersion())
+			log.Printf("no annotations for Resource-version %s", rs.GetAPIVersion())
 			obj := rs.UnstructuredContent()
 			data, err := json.Marshal(obj)
 			if err != nil {
-				log.Printf("Failed to marshal data %v", err.Error())
+				log.Printf("failed to marshal data %v", err.Error())
 				return nil, err
 			}
 			// Instead of directly returning, we will append the packages to the results slice.
@@ -111,7 +112,7 @@ func (dc *DiscoveryClient) GetResourceInfo() ([]*shared.Package, error) {
 					}
 					data, err := json.Marshal(manifest)
 					if err != nil {
-						fmt.Printf("Failed to marshal the data %v", err.Error())
+						fmt.Printf("failed to marshal the data %v", err.Error())
 						return nil, err
 					}
 					// Instead of directly returning, we will append the packages to the results slice.
@@ -135,58 +136,76 @@ func (dc *DiscoveryClient) GetResourceInfo() ([]*shared.Package, error) {
 	return results, nil
 }
 
-// GetPackagesFromManifest extracts packages from the given manifest data.
+// GetPackagesFromYamlManifest extracts packages from the given manifest data.
 func GetPackagesFromYamlManifest(data []byte) ([]*shared.Package, error) {
 	var packages []*shared.Package
+	var tError *yaml.TypeError
 
 	decoder := yaml.NewDecoder(bytes.NewReader(data))
 	for {
-		var pk shared.Package
-		err := decoder.Decode(&pk)
-		if err == io.EOF {
-			break
-		}
+		pack := &shared.Package{}
+		err := decoder.Decode(pack)
 		if err != nil {
-			return nil, err
-		}
-		if pk.Kind == "" || pk.APIVersion == "" {
-			continue
-		}
+			if err == io.EOF {
+				break
+			}
+			if errors.As(err, &tError) {
+				log.Printf("error decoding package: %v", err)
+				continue
+			}
+			return packages, err
 
-		pkg := &shared.Package{
-			Kind:       pk.Kind,
-			APIVersion: pk.APIVersion,
-			Name:       pk.Name,
-			Namespace:  pk.Namespace,
 		}
-		packages = append(packages, pkg)
+		if len(pack.Items) > 0 {
+			log.Printf("found more items in items in current package: %v", len(pack.Items))
+			for _, pk := range pack.Items {
+				currentPack := pk
+				packages = append(packages, &currentPack)
+			}
+		} else {
+			packages = append(packages, pack)
+		}
 	}
 
 	return packages, nil
 }
 
+// // extractPackageFromObject extracts a package from the given object.
+// func extractPackageFromObject(obj interface{}) (*shared.Package, error) {
+// 	data, err := json.Marshal(obj)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	var pk shared.Package
+// 	if err := customUnmarshal(data, &pk); err != nil {
+// 		return nil, err
+// 	}
+
+// 	if pk.Kind == "" || pk.APIVersion == "" {
+// 		return nil, fmt.Errorf("invalid package: %+v", pk)
+// 	}
+
+// 	return &pk, nil
+// }
+
 // GetPackagesFromJSONManifest extracts packages from the given JSON manifest data.
 func GetPackagesFromJSONManifest(data []byte) ([]*shared.Package, error) {
 	var packages []*shared.Package
 
-	var pks []*shared.Package
-	err := json.Unmarshal(data, &pks)
+	pack := &shared.Package{}
+	err := json.Unmarshal(data, pack)
 	if err != nil {
 		return nil, err
 	}
-
-	for _, pk := range pks {
-		if pk.Kind == "" || pk.APIVersion == "" {
-			continue
+	if len(pack.Items) > 0 {
+		log.Printf("found more items in items in current package: %v", len(pack.Items))
+		for _, pk := range pack.Items {
+			currentPack := pk
+			packages = append(packages, &currentPack)
 		}
-
-		pkg := &shared.Package{
-			Kind:       pk.Kind,
-			APIVersion: pk.APIVersion,
-			Name:       pk.Name,
-			Namespace:  pk.Namespace,
-		}
-		packages = append(packages, pkg)
+	} else {
+		packages = append(packages, pack)
 	}
 
 	return packages, nil
