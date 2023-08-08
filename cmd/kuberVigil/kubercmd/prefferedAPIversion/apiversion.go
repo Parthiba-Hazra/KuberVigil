@@ -1,7 +1,7 @@
 /*
 Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 */
-package apiversion
+package cmd
 
 import (
 	"log"
@@ -12,7 +12,7 @@ import (
 )
 
 // apiversionCmd represents the apiversion command
-var apiversionCmd = &cobra.Command{
+var ApiversionCmd = &cobra.Command{
 	Use:   "apiversion",
 	Short: "Check prefered Kubernetes API versions",
 	Long: `This command analyzes the health of Kubernetes API versions for resources in a given namespace.
@@ -28,7 +28,7 @@ It checks the preferred API version of resources and prints the result.`,
 }
 
 func init() {
-	kubercmd.CheckCmd.AddCommand(apiversionCmd)
+	kubercmd.CheckCmd.AddCommand(ApiversionCmd)
 
 	// Here you will define your flags and configuration settings.
 

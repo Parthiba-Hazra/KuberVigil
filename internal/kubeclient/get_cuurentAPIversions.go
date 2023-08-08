@@ -170,25 +170,6 @@ func GetPackagesFromYamlManifest(data []byte) ([]*shared.Package, error) {
 	return packages, nil
 }
 
-// // extractPackageFromObject extracts a package from the given object.
-// func extractPackageFromObject(obj interface{}) (*shared.Package, error) {
-// 	data, err := json.Marshal(obj)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	var pk shared.Package
-// 	if err := customUnmarshal(data, &pk); err != nil {
-// 		return nil, err
-// 	}
-
-// 	if pk.Kind == "" || pk.APIVersion == "" {
-// 		return nil, fmt.Errorf("invalid package: %+v", pk)
-// 	}
-
-// 	return &pk, nil
-// }
-
 // GetPackagesFromJSONManifest extracts packages from the given JSON manifest data.
 func GetPackagesFromJSONManifest(data []byte) ([]*shared.Package, error) {
 	var packages []*shared.Package
@@ -221,4 +202,25 @@ func PrintAPIinfo(namespace string, kubeconfigPath string) {
 		fmt.Printf("error getting resource info: %v", err)
 	}
 	reporting.PrintPackages(info)
+}
+
+func (dc *DiscoveryClient) PreferredAPIversion() (map[string]string, error) {
+	groupVersions, err := dc.DiscoveryClient.ServerPreferredResources()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a map to store resource kinds and their preferred API versions.
+	versionInfo := make(map[string]string)
+
+	// Iterate through the API group versions and extract the preferred API versions for each resource kind.
+	for _, groupVersion := range groupVersions {
+		for _, resourceList := range groupVersion.APIResources {
+			apiVersion := groupVersion.GroupVersion
+			versionInfo[resourceList.Kind] = apiVersion
+		}
+	}
+
+	// Return the extracted version info.
+	return versionInfo, nil
 }

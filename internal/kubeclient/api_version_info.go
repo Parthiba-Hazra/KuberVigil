@@ -14,7 +14,7 @@ type Client interface {
 
 func (c *KubeClient) GetAPIVersionInfo() (map[string]string, error) {
 	// Fetch the preferred API resources from the Kubernetes cluster.
-	groupVersions, err := c.clientset.Discovery().ServerPreferredResources()
+	groupVersions, err := c.Clientset.Discovery().ServerPreferredResources()
 	if err != nil {
 		return nil, err
 	}

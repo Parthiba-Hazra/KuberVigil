@@ -9,9 +9,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// currentApiversionCmd represents the currentApiversion command
-var currentApiversionCmd = &cobra.Command{
-	Use:   "currentApiversion",
+// currentapivCmd represents the currentapiv command
+var currentapivCmd = &cobra.Command{
+	Use:   "currentapiv",
 	Short: "Current API version of resources",
 	Long:  `Show the current API version of resources`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -23,15 +23,15 @@ var currentApiversionCmd = &cobra.Command{
 }
 
 func init() {
-	kubercmd.CheckCmd.AddCommand(currentApiversionCmd)
+	kubercmd.CheckCmd.AddCommand(currentapivCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// currentApiversionCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// currentapivCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// currentApiversionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// currentapivCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

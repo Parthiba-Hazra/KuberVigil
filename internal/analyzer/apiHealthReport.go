@@ -1,22 +1,23 @@
 package analyzer
 
 import (
+	"context"
 	"fmt"
-	"net/http"
 	"time"
 
+	"github.com/Parthiba-Hazra/kubervigil/internal/kubeclient"
 	"github.com/Parthiba-Hazra/kubervigil/internal/shared"
 )
 
 // CreateAPIServerHealthReport creates a detailed health report for the Kubernetes API Server.
-func CreateAPIServerHealthReport(apiServerEndpoints []string, clusterConditions []shared.ClusterConditionStatus) (*shared.APIServerHealthReport, error) {
+func CreateAPIServerHealthReport(apiServerEndpoints []string, clusterConditions []shared.ClusterConditionStatus, client *kubeclient.KubeClient) (*shared.APIServerHealthReport, error) {
 	apiServerHealth := &shared.APIServerHealthReport{
 		APIEndpoints:      make([]shared.EndpointHealthStatus, 0),
 		ClusterConditions: make([]shared.ClusterConditionStatus, 0),
 	}
 
 	for _, endpoint := range apiServerEndpoints {
-		status, message := checkEndpointHealth(endpoint)
+		status, message := checkEndpointHealth(endpoint, client)
 		apiServerHealth.APIEndpoints = append(apiServerHealth.APIEndpoints, shared.EndpointHealthStatus{
 			Endpoint: endpoint,
 			Status:   status,
@@ -38,39 +39,19 @@ func CreateAPIServerHealthReport(apiServerEndpoints []string, clusterConditions 
 	return apiServerHealth, nil
 }
 
-func checkEndpointHealth(endpoint string) (string, string) {
-	// Create a channel to communicate the result and log messages
-	resultCh := make(chan string)
-	logCh := make(chan string)
+func checkEndpointHealth(endpoint string, client *kubeclient.KubeClient) (string, string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 
-	// Create a HTTP client with a timeout
-	client := http.Client{
-		Timeout: 10 * time.Second,
+	logMessage := fmt.Sprintf("Checking API Server endpoint: %s...\n", endpoint)
+	healthzEndpoint := fmt.Sprintf("https://%s/healthz", endpoint)
+
+	_, err := client.Clientset.CoreV1().RESTClient().Get().AbsPath(healthzEndpoint).DoRaw(ctx)
+	if err != nil {
+		return fmt.Sprintf("Error: Failed to reach API Server endpoint: %v", err), logMessage
 	}
 
-	// Start a goroutine to perform the HTTP GET request
-	go func() {
-		logCh <- fmt.Sprintf("Checking API Server endpoint: %s...\n", endpoint)
-		resp, err := client.Get(fmt.Sprintf("http://%s/healthz", endpoint))
-		if err != nil {
-			resultCh <- fmt.Sprintf("Error: Failed to reach API Server endpoint: %s", err)
-		} else {
-			defer resp.Body.Close()
-			if resp.StatusCode == http.StatusOK {
-				resultCh <- "Healthy"
-			} else {
-				resultCh <- fmt.Sprintf("Error: API Server endpoint returned status code: %d", resp.StatusCode)
-			}
-		}
-	}()
-
-	// Wait for the result from the goroutine or a 10-second timeout
-	select {
-	case result := <-resultCh:
-		return result, <-logCh
-	case <-time.After(10 * time.Second):
-		return "Error", "Timeout: API Server endpoint check took too long"
-	}
+	return "Healthy", logMessage
 }
 
 func getOverallAPIServerHealth(endpoints []shared.EndpointHealthStatus, conditions []shared.ClusterConditionStatus) (string, string) {

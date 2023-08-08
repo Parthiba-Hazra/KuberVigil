@@ -19,7 +19,7 @@ func (c *KubeClient) GetDeployments(namespace string) (*v1.DeploymentList, error
 	}
 
 	// Fetch Deployments
-	deployments, err := c.clientset.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
+	deployments, err := c.Clientset.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (c *KubeClient) GetPods(namespace string) (*v2.PodList, error) {
 		namespace = metav1.NamespaceDefault
 	}
 
-	pods, err := c.clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
+	pods, err := c.Clientset.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *KubeClient) GetServices(namespace string) (*v2.ServiceList, error) {
 		namespace = metav1.NamespaceDefault
 	}
 
-	services, err := c.clientset.CoreV1().Services(namespace).List(context.TODO(), metav1.ListOptions{})
+	services, err := c.Clientset.CoreV1().Services(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (c *KubeClient) GetStatefulsets(namespace string) (*v1.StatefulSetList, err
 		namespace = metav1.NamespaceDefault
 	}
 
-	statefulSets, err := c.clientset.AppsV1().StatefulSets(namespace).List(context.TODO(), metav1.ListOptions{})
+	statefulSets, err := c.Clientset.AppsV1().StatefulSets(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *KubeClient) GetDeamonsets(namespace string) (*v1.DaemonSetList, error) 
 		namespace = metav1.NamespaceDefault
 	}
 
-	daemonSets, err := c.clientset.AppsV1().DaemonSets(namespace).List(context.TODO(), metav1.ListOptions{})
+	daemonSets, err := c.Clientset.AppsV1().DaemonSets(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func (c *KubeClient) GetConfigmaps(namespace string) (*v2.ConfigMapList, error) 
 		namespace = metav1.NamespaceDefault
 	}
 
-	configMaps, err := c.clientset.CoreV1().ConfigMaps(namespace).List(context.TODO(), metav1.ListOptions{})
+	configMaps, err := c.Clientset.CoreV1().ConfigMaps(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (c *KubeClient) GetSecrets(namespace string) (*v2.SecretList, error) {
 		namespace = metav1.NamespaceDefault
 	}
 
-	secrets, err := c.clientset.CoreV1().Secrets(namespace).List(context.TODO(), metav1.ListOptions{})
+	secrets, err := c.Clientset.CoreV1().Secrets(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (c *KubeClient) GetAPIEndpoints(namespace string) ([]string, error) {
 
 func (c *KubeClient) getEndpointsList(namespace string) ([]string, error) {
 	// Get the list of all endpoints in the specified namespace.
-	endpointsList, err := c.clientset.CoreV1().Endpoints(namespace).List(context.TODO(), metav1.ListOptions{})
+	endpointsList, err := c.Clientset.CoreV1().Endpoints(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get endpoints list in namespace '%s': %w", namespace, err)
 	}
@@ -142,7 +142,7 @@ func (c *KubeClient) getEndpointsList(namespace string) ([]string, error) {
 
 func (c *KubeClient) GetClusterConditions() ([]shared.ClusterConditionStatus, error) {
 	// Get the list of nodes in the cluster
-	nodes, err := c.clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
+	nodes, err := c.Clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get nodes: %s", err)
 	}
@@ -159,7 +159,7 @@ func (c *KubeClient) GetClusterConditions() ([]shared.ClusterConditionStatus, er
 	}
 
 	// Get the list of pods in the cluster
-	pods, err := c.clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
+	pods, err := c.Clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get pods: %s", err)
 	}

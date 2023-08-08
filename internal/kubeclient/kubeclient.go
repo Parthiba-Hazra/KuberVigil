@@ -2,6 +2,7 @@ package kubeclient
 
 import (
 	"flag"
+	"log"
 	"path/filepath"
 
 	"k8s.io/client-go/dynamic"
@@ -13,9 +14,9 @@ import (
 
 // kubeClient is a concrete implementation of the Client interface.
 type KubeClient struct {
-	clientset     *kubernetes.Clientset
-	dynamicClient dynamic.Interface
-	namespace     string
+	Clientset     *kubernetes.Clientset
+	DynamicClient dynamic.Interface
+	Namespace     string
 }
 
 var kubeconfig *string
@@ -35,6 +36,7 @@ func GetConfig(kubeconfigPath string) *rest.Config {
 	// use the current context in kubeconfig
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
+		log.Printf("config error: %v", err)
 		panic(err.Error())
 	}
 	return config
@@ -48,10 +50,11 @@ func NewClient(kubeconfigPath string) (*KubeClient, error) {
 	// create the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
+		log.Printf("client error: %v", err)
 		panic(err.Error())
 	}
 
 	// fmt.Printf("There are %d pods in the cluster\n", len(pods.Items))
 
-	return &KubeClient{clientset: clientset}, nil
+	return &KubeClient{Clientset: clientset}, nil
 }

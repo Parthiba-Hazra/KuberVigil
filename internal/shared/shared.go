@@ -215,3 +215,12 @@ type Meta struct {
 	Name      string `json:"name" yaml:"name"`
 	Namespace string `json:"namespace" yaml:"namespace"`
 }
+
+type CompareVersion struct {
+	ResourceName    string
+	ResourceKind    string
+	Namespace       string
+	PreferredAPI    string
+	CurrentAPI      string
+	PreferredEquals bool
+}

@@ -119,7 +119,7 @@ func AnalyzeResourceHealth(kubeCOnfigPath string, namespace string, resourceKind
 		if err != nil {
 			return err
 		}
-		report, err := CreateAPIServerHealthReport(apiServerEndpoints, clusterCondition)
+		report, err := CreateAPIServerHealthReport(apiServerEndpoints, clusterCondition, client)
 		if err != nil {
 			return err
 		}
