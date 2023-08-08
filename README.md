@@ -1,6 +1,6 @@
 # Kubervigil
 
-Kubervigil is a command-line tool for analyzing the health of Kubernetes resources and API endpoints in a given namespace. It provides detailed health reports for different Kubernetes resources and checks the status of API endpoints.
+Kubervigil is a command-line tool for analyzing the health of Kubernetes resources ,API endpoints and API versions in a given namespace. It provides detailed health reports for different Kubernetes resources and checks the status of API endpoints.
 
 ## Installation
 
@@ -31,13 +31,26 @@ kubervigil check [command]
 ```
 ### Commands
 
-#### APIversion command
+#### Preferred APIversion command
 Check preferred api-versions for all resources.
 
 ```bash
-kubervigil check apiversion
+kubervigil check recomapiv
 ```
 NOTE: Providing kubeconfig path or namespace is optional if you dont provide config path it will try to get path from ~/.kube/config, and if you dont provide any namespace it will autometically serlect the default namespace.
+
+#### Compare APIversion command
+Check preferred api-version and current api version are same or not for all resources.
+
+```bash
+kubervigil check compareapiv
+```
+#### Current APIversion command
+Check current api version for all resources.
+
+```bash
+kubervigil check currentapiv
+```
 
 #### API Command
 Check the preferred Kubernetes API versions for resources in a given namespace.
@@ -90,4 +103,4 @@ kubervigil check ingress --config=<path/to/kubeconfig> --ns=<namespace>
 ```
 
 We will be add more helath analysis features.
-Feel free to contribute.. 
+Feel free to contribute..
