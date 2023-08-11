@@ -37,6 +37,9 @@ Check preferred api-versions for all resources.
 ```bash
 kubervigil check recomapiv
 ```
+
+![preferred api demo](./demo/recom.png)
+
 NOTE: Providing kubeconfig path or namespace is optional if you dont provide config path it will try to get path from ~/.kube/config, and if you dont provide any namespace it will autometically serlect the default namespace.
 
 #### Compare APIversion command
@@ -45,12 +48,16 @@ Check preferred api-version and current api version are same or not for all reso
 ```bash
 kubervigil check compareapiv
 ```
+![compare demo](./demo/compare.png)
+
 #### Current APIversion command
 Check current api version for all resources.
 
 ```bash
 kubervigil check currentapiv
 ```
+
+![current api demo](./demo/current.png)
 
 #### API Command
 Check the preferred Kubernetes API versions for resources in a given namespace.
@@ -64,12 +71,16 @@ Analyze the health of Pods in a given namespace.
 ```bash
 kubervigil check pods --config=<path/to/kubeconfig> --ns=<namespace>
 ```
+![pods demo](./demo/pods.png)
+
 #### Services Command
 Analyze the health of Services in a given namespace.
 
 ```bash
 kubervigil check services --config=<path/to/kubeconfig> --ns=<namespace>
-````
+```
+![service demo](./demo/service.png)
+
 #### Deployments Command
 Analyze the health of Deployments in a given namespace.
 
